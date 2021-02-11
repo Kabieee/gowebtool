@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gowebtool/common"
 	"net/http"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,8 +17,8 @@ type TempData struct {
 	ContentType string
 	Agent       string
 	Error       string
-	Body        map[string]interface{}
-	Query       url.Values
+	//Body        map[string]interface{}
+	//Query       url.Values
 }
 
 const execPath = "/home/lzfeng/devgo/gowebtool/shell"
@@ -43,8 +42,8 @@ func (s *SiteController) ParseRequest(c *gin.Context) *TempData {
 			temp.Error = err.Error()
 		}
 	}
-	temp.Body = bodyMap
-	temp.Query = c.Request.URL.Query()
+	//temp.Body = bodyMap
+	//temp.Query = c.Request.URL.Query()
 	return temp
 }
 
@@ -59,8 +58,8 @@ func (s *SiteController) Index(c *gin.Context) {
 
 func (s *SiteController) User(c *gin.Context) {
 	s.ParseRequest(c)
-	tk, ok := temp.Query["tk"]
-	if !ok || len(tk) == 0 || tk[0] != "user666" {
+	tk := c.Query("tk")
+	if tk != "user666" {
 		return
 	}
 	cmd := fmt.Sprintf("id")
