@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"gowebtool/controller"
 	"io/ioutil"
 	"net/http"
 
@@ -18,11 +19,11 @@ func CheckGitHubToken() gin.HandlerFunc {
 		githubSign := c.GetHeader("X-Hub-Signature-256")
 		giteeSign := c.GetHeader("X-Gitee-Token")
 		if githubSign == "" && giteeSign == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"Code":    http.StatusUnauthorized,
-				"Message": http.StatusText(http.StatusUnauthorized),
-				"Data":    "missing sign",
-			})
+			base.Fail(c, &controller.Fail{
+				Code:      4001,
+				Message:   http.StatusText(http.StatusUnauthorized),
+				ErrorInfo: "missing sign",
+			}, http.StatusUnauthorized)
 			return
 		}
 		body, _ := c.GetRawData()
@@ -40,11 +41,11 @@ func CheckGitHubToken() gin.HandlerFunc {
 			hash.Write(body)
 			hashString := "sha256=" + hex.EncodeToString(hash.Sum(nil))
 			if !hmac.Equal([]byte(githubSign), []byte(hashString)) {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"Code":    http.StatusUnauthorized,
-					"Message": http.StatusText(http.StatusUnauthorized),
-					"Data":    fmt.Sprintf("sign not match github %s != %s", githubSign, hashString),
-				})
+				base.Fail(c, &controller.Fail{
+					Code:      4001,
+					Message:   http.StatusText(http.StatusUnauthorized),
+					ErrorInfo: fmt.Sprintf("sign not match github %s != %s", githubSign, hashString),
+				}, http.StatusUnauthorized)
 				return
 			}
 			c.Next()
@@ -53,11 +54,11 @@ func CheckGitHubToken() gin.HandlerFunc {
 
 		if giteeSign != "" {
 			if giteeSign != key {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"Code":    http.StatusUnauthorized,
-					"Message": http.StatusText(http.StatusUnauthorized),
-					"Data":    fmt.Sprintf("sign not match gitee"),
-				})
+				base.Fail(c, &controller.Fail{
+					Code:      4001,
+					Message:   http.StatusText(http.StatusUnauthorized),
+					ErrorInfo: fmt.Sprintf("sign not match gitee"),
+				}, http.StatusUnauthorized)
 				return
 			}
 			c.Next()

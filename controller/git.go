@@ -3,22 +3,17 @@ package controller
 import (
 	"fmt"
 	"gowebtool/common"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type GitController struct {
-	SiteController
+	BaseController
 }
 
 func (g *GitController) Self(c *gin.Context) {
 	g.ParseRequest(c)
 	cmd := fmt.Sprintf("%s/git_self.sh", execPath)
 	execCmd := common.ExecCmd(cmd)
-	c.JSON(http.StatusOK, gin.H{
-		"Code": http.StatusOK,
-		"Data": temp,
-		"Exec": execCmd,
-	})
+	g.Success(c, &Success{Data: temp, Extend: execCmd})
 }
