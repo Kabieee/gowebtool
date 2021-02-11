@@ -14,7 +14,7 @@ type GitController struct {
 
 func (g *GitController) Self(c *gin.Context) {
 	g.ParseRequest(c)
-	cmd := fmt.Sprintf("git")
+	cmd := fmt.Sprintf("%s/git_self.sh", execPath)
 	execCmd := common.ExecCmd(cmd)
 	c.JSON(http.StatusOK, gin.H{
 		"Code": http.StatusOK,
