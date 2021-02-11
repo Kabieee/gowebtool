@@ -40,9 +40,8 @@ func (t *ToolController) SendEmail(c *gin.Context) {
 	m := gomail.NewMessage()
 	m.SetAddressHeader("From", "send@email.makemake.in", "Send")
 	m.SetHeader("To", data.To)
-	m.SetHeader("Subject", "Send Message")
-
-	content := fmt.Sprintf("<p><h1>Send At %s</h1><br><p>%s</p></p>", time.Now().Format(time.RFC3339), data.Body)
+	m.SetHeader("Subject", "Notify")
+	content := fmt.Sprintf("<h3>Notify Time: %s</h3><br><p>%s</p>", time.Now().Format(time.RFC3339), data.Body)
 	m.SetBody("text/html", content)
 
 	task.EmailChan <- &task.Email{
