@@ -52,7 +52,7 @@ func (s *SiteController) Index(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"Code":    http.StatusOK,
 		"Data":    temp,
-		"Message": "ok",
+		"Message": "OK",
 	})
 }
 
