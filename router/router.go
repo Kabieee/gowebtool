@@ -37,6 +37,8 @@ func InitRouter() {
 		tool := new(controller.ToolController)
 		toolGroup.GET("/SendEmail", tool.SendEmail)
 		toolGroup.POST("/SendEmail", tool.SendEmail)
+		toolGroup.Any("/WaterMark", tool.WaterMark)
+
 	}
 	Engine = e
 }
