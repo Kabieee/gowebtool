@@ -17,6 +17,14 @@ func InitRouter() {
 	e.Any("/index", base.Index)
 	e.GET("/user", base.User)
 	e.POST("/user", base.User)
+
+	//if va, ok := binding.Validator.Engine().(*validator.Validate); ok {
+	//	eng := en.New()
+	//	uni := ut.New(eng, eng)
+	//	tran, _ := uni.GetTranslator(eng.Locale())
+	//	enTransaction.RegisterDefaultTranslations(va, tran)
+	//}
+
 	gitGroup := e.Group("/git")
 	{
 		gitGroup.Use(CheckGitHubToken())

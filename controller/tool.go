@@ -8,6 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	en2 "github.com/go-playground/validator/v10/translations/en"
+
 	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +28,19 @@ func (t *ToolController) SendEmail(c *gin.Context) {
 		To   string `json:"to" form:"to" binding:"required,email"`
 		Body string `json:"body" form:"body" binding:"required"`
 	}
+	var tran ut.Translator
+	if va, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		eng := en.New()
+		uni := ut.New(eng, eng)
+		tran, _ = uni.GetTranslator(eng.Locale())
+		en2.RegisterDefaultTranslations(va, tran)
+
+	}
 	var data RequestData
 	err := c.ShouldBind(&data)
 	if err != nil {
 		for _, filedError := range err.(validator.ValidationErrors) {
-			t.Fail(c, &Fail{ErrorInfo: fmt.Sprint(filedError)})
+			t.Fail(c, &Fail{ErrorInfo: filedError.Translate(tran)})
 			return
 		}
 	}
