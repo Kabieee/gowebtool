@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lucasb-eyer/go-colorful"
 
@@ -74,6 +75,7 @@ func (t *ToolController) WaterMark(c *gin.Context) {
 		return
 	}
 
+	// 设置图片透明
 	maskImg := image.NewAlpha(wrawImg.Bounds())
 	for x := 0; x < wrawImg.Bounds().Dx(); x++ {
 		for y := 0; y < wrawImg.Bounds().Dy(); y++ {
@@ -82,12 +84,6 @@ func (t *ToolController) WaterMark(c *gin.Context) {
 			//maskImg.Set(x, y, color.Alpha{A: uint8(256 - r)})
 		}
 	}
-
-	//fmt.Println(wrawImg.Bounds().Dx(), wrawImg.Bounds().Dy())
-	//fmt.Println(wimageType)
-	//
-	//fmt.Println(rawImg.ColorModel())
-	//fmt.Println(rawImg.Bounds().Dx(), rawImg.Bounds().Dy())
 
 	offset := image.Pt(rawImg.Bounds().Dx()-wrawImg.Bounds().Dx(), rawImg.Bounds().Dy()-wrawImg.Bounds().Dy())
 	newImage := image.NewRGBA(rawImg.Bounds())
@@ -107,20 +103,23 @@ func (t *ToolController) WaterMark(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
+	fontsize := 68
 	f := freetype.NewContext()
-	f.SetDPI(72)
+	f.SetDPI(float64(fontsize))
 	f.SetFont(fonts)
-	f.SetFontSize(65)
+	f.SetFontSize(float64(fontsize))
 	f.SetClip(newImage.Bounds())
 	f.SetDst(newImage)
 	f.SetHinting(font.HintingFull)
 
-	col := colorful.FastHappyColor()
-	fmt.Println(col.Hex())
+	timeStr := time.Now().Format("Jan Mon 2006-01-02 15:04:05 MST")
+	colRandom := colorful.FastHappyColor()
+	col := CombineColor(colRandom.RGB255())
 	s := image.NewUniform(col)
 	f.SetSrc(s)
-	fpt := freetype.Pt(newImage.Bounds().Dx()-10*70, newImage.Bounds().Dy()-35)
-	_, err = f.DrawString("TEST WATER MARK", fpt)
+
+	fpt := freetype.Pt(newImage.Bounds().Dx()-((fontsize/2)+(fontsize%2))*len(timeStr), newImage.Bounds().Dy()-(fontsize/2))
+	_, err = f.DrawString(timeStr, fpt)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -137,20 +136,28 @@ func (t *ToolController) WaterMark(c *gin.Context) {
 	c.Data(200, mimeType, buf.Bytes())
 }
 
-func CombineColor() color.Color {
-	// 合并颜色, 透明色
+func CombineColor(cols ...uint8) color.Color {
 	col := color.RGBA{
-		R: 7,
-		G: 40,
-		B: 187,
+		R: 255,
+		G: 255,
+		B: 255,
 		A: 255,
 	}
+	offset := 8
+
+	if len(cols) >= 3 {
+		col.R = cols[0]
+		col.G = cols[1]
+		col.B = cols[2]
+		offset = 9
+	}
+	// 合并颜色, 透明色
 	r, g, b, a := col.RGBA()
 	r2, g2, b2, a2 := color.Alpha{A: 128}.RGBA()
-	col.R = uint8((r + r2) >> 9) // div by 2 followed by">> 8"  is">> 9"
-	col.G = uint8((g + g2) >> 9)
-	col.B = uint8((b + b2) >> 9)
-	col.A = uint8((a + a2) >> 9)
-	//fmt.Println(col.A, col.G, col.B, col.A)
+	col.R = uint8((r + r2) >> offset) // div by 2 followed by">> 8"  is">> 9"
+	col.G = uint8((g + g2) >> offset)
+	col.B = uint8((b + b2) >> offset)
+	col.A = uint8((a + a2) >> offset)
+	fmt.Println(col.A, col.G, col.B, col.A)
 	return col
 }
