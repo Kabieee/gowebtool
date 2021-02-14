@@ -126,7 +126,7 @@ func (t *ToolController) WaterMark(c *gin.Context) {
 	}
 
 	buf := bytes.NewBuffer(nil)
-	err = jpeg.Encode(buf, newImage, &jpeg.Options{Quality: 100})
+	err = jpeg.Encode(buf, newImage, &jpeg.Options{Quality: 75})
 	if err != nil {
 		c.String(200, err.Error())
 		return
